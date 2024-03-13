@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #resultado {
+            margin-top: 20px;
+            /* background-color: #fff;*/
+            padding: 20px;
+            border-radius: 8px;
+            /*box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);*/
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        h3 {
+            color: #666;
+            margin-top: 20px;
+        }
+
+        p {
+            margin: 5px 0;
+        }
+    </style>
+    <style>
+        table,
+        th,
+        td {
+            border: 1px solid black;
+        }
+    </style>
+    <title>Calculadora de Torneo de Debate</title>
+</head>
+
+<body>
+    <h1>Calculadora de Torneo de Debate</h1>
+    <form id="sumForm">
+        <label for="Equipos">Equipos:</label>
+        <input type="number" id="equipos" name="equipos" required>
+        <br>
+        <label for="Salas">Salas:</label>
+        <input type="number" id="salas" name="salas" required>
+        <br>
+        <label for="Rondas">Rondas:</label>
+        <input type="number" id="rondas" name="rondas" required>
+        <br>
+        <button type="button" onclick="calcular()">Calcular</button>
+    </form>
+    <p>Resultado: <output id="resultado"></output></p>
+
+    <script>
+        function calcular() {
+            // var matriz = [[1, 2]];
+            // var matriz2 = [[1, 2]];
+            // var nuuevo = [3, 4];
+            // matriz.push(nuuevo);
+            // console.log(matriz[1][0] + "-" + matriz[1][1]);
+            // console.log(matriz.includes(nuuevo));
+
+
+            var equipos = parseInt(document.getElementById('equipos').value);
+            var salas = parseInt(document.getElementById('salas').value);
+            var rondas = parseInt(document.getElementById('rondas').value);
+            if (!isNaN(equipos) && !isNaN(salas) && !isNaN(rondas)) {
+                var combinations = (equipos * (equipos - 1)) / 2;
+                var salasok = Math.floor(equipos / 2);
+                var rondasok = Math.floor(combinations / salasok);
+                var partidas = salas * rondas;
+                document.getElementById('resultado').textContent = 'Número de combinaciones: ' + combinations + '. Número máximo y recomendado de salas: ' + salasok + '. Número máximo y recomendado de rondas: ' + rondasok;
+
+                if (partidas > combinations || salas > salasok) {
+                    document.getElementById('resultado').textContent += ' No se puede calcular porque supera el número de combinaciones en cada ronda o en total';
+                } else {
+                    var matriz = new Array();
+                    var torneo = new Array();
+                    var enronda = new Array();
+                    var tmp = new Array();
+                    var ronda = 0;
+
+
+                    for (let i = 1; i <= equipos; i++) {
+                        for (let j = i + 1; j <= equipos; j++) {
+                            var combo = [i, j];
+                            if (!matriz.includes(combo)) {
+                                matriz.push(combo);
+                                // console.log(combo);
+                            }
+                        }
+                    }
+
+                    var clon = JSON.parse(JSON.stringify(matriz));
+
+                    for (let i = 0; i < salas * rondas;) {
+                        let repetido = false;
+                        let intento = 0;
+
+                        do {
+                            repetido = false;
+                            tmp = clon.splice(Math.floor(Math.random() * clon.length), 1)[0];
+                            //tmp = clon.splice(0, 1)[0];
+                            // clon = JSON.parse(JSON.stringify(clon));
+                            console.log(clon.length + " " + tmp);
+                            if (i % salas == 0) {
+                                ronda++;
+                                enronda = [];
+                                enronda.push(tmp[0]);
+                                enronda.push(tmp[1]);
+                                console.log("Añado " + tmp[0] + " y " + tmp[1] + " en ronda " + ronda);
+                                torneo[i] = tmp;
+                                i++;
+
+                            } else {
+                                if (enronda.includes(tmp[0]) || enronda.includes(tmp[1])) {
+                                    console.log(tmp[0] + " o " + tmp[1] + " ya estaba en la ronda " + ronda);
+                                    clon.push(tmp);
+                                    clon = JSON.parse(JSON.stringify(clon));
+                                    intento++;
+                                    if (intento > 100) {
+                                        intento = 0;
+                                        i = 0;
+                                        torneo = new Array();
+                                        ronda = 0;
+                                        console.log("llegamos a 100");
+                                        clon = JSON.parse(JSON.stringify(matriz));
+                                    }
+                                    repetido = true;
+                                    continue;
+                                } else {
+                                    enronda.push(tmp[0]);
+                                    enronda.push(tmp[1]);
+                                    console.log("Añado " + tmp[0] + " y " + tmp[1] + " en ronda " + ronda);
+                                    torneo[i] = tmp;
+                                    i++;
+                                }
+                            }
+                        } while (repetido);
+                    }
+
+                    var tabla = "<table><tr><td></td>";
+                    for (let i = 1; i <= rondas; i++) {
+                        tabla += "<td> Ronda " + i + "</td>";
+                    }
+                    tabla += "</tr>";
+
+                    for (let i = 0; i < salas; i++) {
+                        tabla += "<tr><td> Sala " + (i + 1) + "</td>";
+
+                        for (let j = 0; j < rondas; j++) {
+                            tabla += "<td>" + torneo[i + (salas * j)][0] + "-" + torneo[i + (salas * j)][1] + "</td>";
+                            // tabla += "<td>[" + (i + (salas * j))+" [0]  - [ " + (i + (salas * j))+" [1] </td>";
+                            //console.log("[" + (i * salas + j) + "][0]-[" + (i * salas + j) + "][1]");
+                        }
+                        tabla += "</tr>";
+                    }
+
+                    tabla += "</table>";
+
+
+                    document.getElementById('resultado').innerHTML += tabla;
+                }
+
+
+
+
+
+
+            } else {
+                document.getElementById('resultado').textContent = "Ingrese números válidos.";
+            }
+        }
+
+    </script>
+     <p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><span property="dct:title">Calculo de torneos de debate</span> by <span property="cc:attributionName">Antonio Sillero</span> is licensed under <a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY-SA 4.0<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a></p> 
+</body>
+
+</html>
