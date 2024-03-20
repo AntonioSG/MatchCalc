@@ -74,14 +74,31 @@
         p {
             margin: 5px 0;
         }
-    </style>
-    <style>
-        table,
-        th,
-        td {
-            border: 1px solid black;
+
+        table {
+            table-layout: fixed;
+            width: 100%;
+            border-collapse: collapse;
+            border: 3px solid purple;
+        }
+
+        thead th:nth-child(1) {
+            width: 30%;
+        }
+
+        thead th:nth-child(2) {
+            width: 20%;
+        }
+
+        thead th:nth-child(3) {
+            width: 15%;
+        }
+
+        thead th:nth-child(4) {
+            width: 35%;
         }
     </style>
+
     <title>Calculadora de Torneo de Debate</title>
 </head>
 
@@ -103,12 +120,6 @@
 
     <script>
         function calcular() {
-            // var matriz = [[1, 2]];
-            // var matriz2 = [[1, 2]];
-            // var nuuevo = [3, 4];
-            // matriz.push(nuuevo);
-            // console.log(matriz[1][0] + "-" + matriz[1][1]);
-            // console.log(matriz.includes(nuuevo));
 
 
             var equipos = parseInt(document.getElementById('equipos').value);
@@ -129,6 +140,8 @@
                     var enronda = new Array();
                     var tmp = new Array();
                     var ronda = 0;
+                    var repetido = false;
+                    var intento = 0;
 
 
                     for (let i = 1; i <= equipos; i++) {
@@ -144,36 +157,30 @@
                     var clon = JSON.parse(JSON.stringify(matriz));
 
                     for (let i = 0; i < salas * rondas;) {
-                        let repetido = false;
-                        let intento = 0;
-
                         do {
                             repetido = false;
                             tmp = clon.splice(Math.floor(Math.random() * clon.length), 1)[0];
-                            //tmp = clon.splice(0, 1)[0];
-                            // clon = JSON.parse(JSON.stringify(clon));
-                            console.log(clon.length + " " + tmp);
+                            // console.log(clon.length + " " + tmp);
                             if (i % salas == 0) {
                                 ronda++;
                                 enronda = [];
                                 enronda.push(tmp[0]);
                                 enronda.push(tmp[1]);
-                                console.log("Añado " + tmp[0] + " y " + tmp[1] + " en ronda " + ronda);
+                                // console.log("Añado " + tmp[0] + " y " + tmp[1] + " en ronda " + ronda);
                                 torneo[i] = tmp;
                                 i++;
 
                             } else {
                                 if (enronda.includes(tmp[0]) || enronda.includes(tmp[1])) {
-                                    console.log(tmp[0] + " o " + tmp[1] + " ya estaba en la ronda " + ronda);
+                                    // console.log(tmp[0] + " o " + tmp[1] + " ya estaba en la ronda " + ronda);
                                     clon.push(tmp);
-                                    clon = JSON.parse(JSON.stringify(clon));
                                     intento++;
                                     if (intento > 100) {
                                         intento = 0;
                                         i = 0;
                                         torneo = new Array();
                                         ronda = 0;
-                                        console.log("llegamos a 100");
+                                        //console.log("llegamos a 100");
                                         clon = JSON.parse(JSON.stringify(matriz));
                                     }
                                     repetido = true;
@@ -181,7 +188,7 @@
                                 } else {
                                     enronda.push(tmp[0]);
                                     enronda.push(tmp[1]);
-                                    console.log("Añado " + tmp[0] + " y " + tmp[1] + " en ronda " + ronda);
+                                    // console.log("Añado " + tmp[0] + " y " + tmp[1] + " en ronda " + ronda);
                                     torneo[i] = tmp;
                                     i++;
                                 }
@@ -200,8 +207,6 @@
 
                         for (let j = 0; j < rondas; j++) {
                             tabla += "<td>" + torneo[i + (salas * j)][0] + "-" + torneo[i + (salas * j)][1] + "</td>";
-                            // tabla += "<td>[" + (i + (salas * j))+" [0]  - [ " + (i + (salas * j))+" [1] </td>";
-                            //console.log("[" + (i * salas + j) + "][0]-[" + (i * salas + j) + "][1]");
                         }
                         tabla += "</tr>";
                     }
@@ -223,7 +228,16 @@
         }
 
     </script>
-     <p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><span property="dct:title">Calculo de torneos de debate</span> by <span property="cc:attributionName">Antonio Sillero</span> is licensed under <a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY-SA 4.0<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a></p> 
 </body>
+<p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><span property="dct:title">Calculo de
+        torneos de debate</span> by <span property="cc:attributionName">Antonio Sillero</span> is licensed under <a
+        href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank"
+        rel="license noopener noreferrer" style="display:inline-block;">CC BY-SA 4.0<img
+            style="height:22px!important;margin-left:3px;vertical-align:text-bottom;"
+            src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img
+            style="height:22px!important;margin-left:3px;vertical-align:text-bottom;"
+            src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img
+            style="height:22px!important;margin-left:3px;vertical-align:text-bottom;"
+            src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a></p>
 
 </html>
