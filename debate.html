@@ -63,7 +63,8 @@
         }
 
         h2 {
-            color: #333;
+            text-align: center;
+            color: #1008f7;
         }
 
         h3 {
@@ -104,6 +105,8 @@
 
 <body>
     <h1>Calculadora de Torneo de Debate</h1>
+    <h2>IES Francisco de los Ríos</h2>
+    <p>Las combinaciones se generan de manera aleatoria. El tiempo de procesamiento aumenta de manera exponencial al número de equipos</p>
     <form id="sumForm">
         <label for="Equipos">Equipos:</label>
         <input type="number" id="equipos" name="equipos" required>
@@ -138,57 +141,64 @@
                     var matriz = new Array();
                     var torneo = new Array();
                     var enronda = new Array();
+                    var clon = new Array();
+                    var matrizdisord = new Array();
                     var tmp = new Array();
                     var ronda = 0;
                     var repetido = false;
-                    var intento = 0;
+                    var intento;
 
 
                     for (let i = 1; i <= equipos; i++) {
                         for (let j = i + 1; j <= equipos; j++) {
-                            var combo = [i, j];
+                            let combo = [i, j];
                             if (!matriz.includes(combo)) {
                                 matriz.push(combo);
-                                // console.log(combo);
                             }
                         }
                     }
+                    clon = JSON.parse(JSON.stringify(matriz));
 
-                    var clon = JSON.parse(JSON.stringify(matriz));
+                    for (let i = 0; i < combinations; i++) {
+                        matrizdisord.push(clon.splice(Math.floor(Math.random() * clon.length), 1)[0]);
+                    }
 
                     for (let i = 0; i < salas * rondas;) {
+                        intento=1;
                         do {
                             repetido = false;
-                            tmp = clon.splice(Math.floor(Math.random() * clon.length), 1)[0];
-                            // console.log(clon.length + " " + tmp);
+                            tmp = matrizdisord.shift();
+                            
                             if (i % salas == 0) {
                                 ronda++;
                                 enronda = [];
                                 enronda.push(tmp[0]);
                                 enronda.push(tmp[1]);
-                                // console.log("Añado " + tmp[0] + " y " + tmp[1] + " en ronda " + ronda);
-                                torneo[i] = tmp;
+                                torneo[i] = tmp;             
                                 i++;
 
                             } else {
                                 if (enronda.includes(tmp[0]) || enronda.includes(tmp[1])) {
-                                    // console.log(tmp[0] + " o " + tmp[1] + " ya estaba en la ronda " + ronda);
-                                    clon.push(tmp);
+                                    matrizdisord.push(tmp);
                                     intento++;
-                                    if (intento > 100) {
-                                        intento = 0;
+                                    if (intento > matrizdisord.length) {
+                                        intento = 1;
                                         i = 0;
                                         torneo = new Array();
+                                        matrizdisord=new Array();
                                         ronda = 0;
-                                        //console.log("llegamos a 100");
                                         clon = JSON.parse(JSON.stringify(matriz));
+                                        for (let i = 0; i < combinations; i++) {
+                                            matrizdisord.push(clon.splice(Math.floor(Math.random() * clon.length), 1)[0]);
+                                        }
+                                        console.log(JSON.stringify(matrizdisord));
+                                        break;
                                     }
                                     repetido = true;
                                     continue;
                                 } else {
                                     enronda.push(tmp[0]);
                                     enronda.push(tmp[1]);
-                                    // console.log("Añado " + tmp[0] + " y " + tmp[1] + " en ronda " + ronda);
                                     torneo[i] = tmp;
                                     i++;
                                 }
