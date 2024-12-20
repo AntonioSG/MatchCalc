@@ -100,11 +100,11 @@
         }
     </style>
 
-    <title>Calculadora de Torneo de Debate</title>
+    <title>Calculadora de resultMatrix de Debate</title>
 </head>
 
 <body>
-    <h1>Calculadora de Torneo de Debate</h1>
+    <h1>Calculadora de resultMatrix de Debate</h1>
     <h2>IES Francisco de los Ríos</h2>
     <p>Las combinaciones se generan de manera aleatoria. El tiempo de procesamiento aumenta de manera exponencial al número de equipos</p>
     <form id="sumForm">
@@ -138,60 +138,49 @@
                 if (partidas > combinations || salas > salasok) {
                     document.getElementById('resultado').textContent += ' No se puede calcular porque supera el número de combinaciones en cada ronda o en total';
                 } else {
-                    var matriz = new Array();
-                    var torneo = new Array();
+                    var matrix = new Array();
+                    var resultMatrix = new Array();
                     var enronda = new Array();
-                    var clon = new Array();
-                    var matrizdisord = new Array();
+                    var matrixCopyToSplice = new Array();
+                    var randomMarix = new Array();
                     var tmp = new Array();
                     var ronda = 0;
                     var repetido = false;
                     var intento;
 
 
-                    for (let i = 1; i <= equipos; i++) {
-                        for (let j = i + 1; j <= equipos; j++) {
-                            let combo = [i, j];
-                            if (!matriz.includes(combo)) {
-                                matriz.push(combo);
-                            }
-                        }
-                    }
-                    clon = JSON.parse(JSON.stringify(matriz));
-
-                    for (let i = 0; i < combinations; i++) {
-                        matrizdisord.push(clon.splice(Math.floor(Math.random() * clon.length), 1)[0]);
-                    }
+                    fillAllCombinationsMatrix(equipos, matrix, combinations);
+					
+					}
+					
+					fillRandomMatrix(randomMarix,matrix, combinations);
 
                     for (let i = 0; i < salas * rondas;) {
                         intento=1;
                         do {
                             repetido = false;
-                            tmp = matrizdisord.shift();
+                            tmp = randomMarix.shift();
                             
                             if (i % salas == 0) {
                                 ronda++;
                                 enronda = [];
                                 enronda.push(tmp[0]);
                                 enronda.push(tmp[1]);
-                                torneo[i] = tmp;             
+                                resultMatrix[i] = tmp;
                                 i++;
 
                             } else {
                                 if (enronda.includes(tmp[0]) || enronda.includes(tmp[1])) {
-                                    matrizdisord.push(tmp);
+                                    randomMarix.push(tmp);
                                     intento++;
-                                    if (intento > matrizdisord.length) {
+                                    if (intento > randomMarix.length) {
                                         intento = 1;
                                         i = 0;
-                                        torneo = new Array();
-                                        matrizdisord=new Array();
+                                        resultMatrix = new Array();
+                                        randomMarix=new Array();
                                         ronda = 0;
-                                        clon = JSON.parse(JSON.stringify(matriz));
-                                        for (let i = 0; i < combinations; i++) {
-                                            matrizdisord.push(clon.splice(Math.floor(Math.random() * clon.length), 1)[0]);
-                                        }
-                                        console.log(JSON.stringify(matrizdisord));
+										fillRandomMatrix(randomMarix, matrix, combinations);
+                                        //console.log(JSON.stringify(randomMarix));
                                         break;
                                     }
                                     repetido = true;
@@ -199,14 +188,20 @@
                                 } else {
                                     enronda.push(tmp[0]);
                                     enronda.push(tmp[1]);
-                                    torneo[i] = tmp;
+                                    resultMatrix[i] = tmp;
                                     i++;
                                 }
                             }
                         } while (repetido);
                     }
-
-                    var tabla = "<table><tr><td></td>";
+					printResultTable(rondas, salas, resultMatrix);
+                
+            } else {
+                document.getElementById('resultado').textContent = "Ingrese números válidos.";
+            }
+        }
+		function printResultTable(rondas, salas, resultMatrix){
+		var tabla = "<table><tr><td></td>";
                     for (let i = 1; i <= rondas; i++) {
                         tabla += "<td> Ronda " + i + "</td>";
                     }
@@ -216,7 +211,7 @@
                         tabla += "<tr><td> Sala " + (i + 1) + "</td>";
 
                         for (let j = 0; j < rondas; j++) {
-                            tabla += "<td>" + torneo[i + (salas * j)][0] + "-" + torneo[i + (salas * j)][1] + "</td>";
+                            tabla += "<td>" + resultMatrix[i + (salas * j)][0] + "-" + resultMatrix[i + (salas * j)][1] + "</td>";
                         }
                         tabla += "</tr>";
                     }
@@ -225,22 +220,32 @@
 
 
                     document.getElementById('resultado').innerHTML += tabla;
-                }
+					}
 
+		function fillAllCombinationsMatrix(equipos,matrix){
+					for (let i = 1; i <= equipos; i++) {
+                        for (let j = i + 1; j <= equipos; j++) {
+                            let combo = [i, j];
+                            if (!matrix.includes(combo)) {
+                                matrix.push(combo);
+                            }
+                        }
+                    }
+					}
+		function fillRandomMatrix(randomMarix, matrix, combinations){
+					let matrixCopyToSplice = new Array();
+                    matrixCopyToSplice = JSON.parse(JSON.stringify(matrix));
 
-
-
-
-
-            } else {
-                document.getElementById('resultado').textContent = "Ingrese números válidos.";
-            }
-        }
+                    for (let i = 0; i < combinations; i++) {
+						
+                        randomMarix.push(matrixCopyToSplice.splice(Math.floor(Math.random() * matrixCopyToSplice.length), 1)[0]);
+                    }
+				}
 
     </script>
 </body>
 <p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><span property="dct:title">Calculo de
-        torneos de debate</span> by <span property="cc:attributionName">Antonio Sillero</span> is licensed under <a
+        resultMatrixs de debate</span> by <span property="cc:attributionName">Antonio Sillero</span> is licensed under <a
         href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank"
         rel="license noopener noreferrer" style="display:inline-block;">CC BY-SA 4.0<img
             style="height:22px!important;margin-left:3px;vertical-align:text-bottom;"
