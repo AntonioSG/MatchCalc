@@ -76,43 +76,39 @@
             margin: 5px 0;
         }
 
+        .favor{
+            color: #45a049;
+        }
+
+        .contra{
+            color: #a8383e;
+        }
+
         table {
             table-layout: fixed;
-            width: 100%;
             border-collapse: collapse;
             border: 3px solid purple;
         }
 
-        thead th:nth-child(1) {
-            width: 30%;
-        }
-
-        thead th:nth-child(2) {
-            width: 20%;
-        }
-
-        thead th:nth-child(3) {
-            width: 15%;
-        }
-
-        thead th:nth-child(4) {
-            width: 35%;
+        th,
+        td {
+            border: 1px solid black;
+            border-collapse: collapse;
         }
     </style>
 
-    <title>Calculadora de resultMatrix de Debate</title>
+    <title>Calculadora de Toneo de Debate</title>
 </head>
 
 <body>
-    <h1>Calculadora de resultMatrix de Debate</h1>
+    <h1>Calculadora de Torneo de Debate</h1>
     <h2>IES Francisco de los Ríos</h2>
-    <p>Las combinaciones se generan de manera aleatoria. El tiempo de procesamiento aumenta de manera exponencial al número de equipos</p>
+    <p>Las combinaciones se generan de manera aleatoria. El tiempo de procesamiento aumenta de manera exponencial al
+        número de equipos y de rondas.</p>
+    <p>El número de equipos ha de ser par.</p>
     <form id="sumForm">
         <label for="Equipos">Equipos:</label>
         <input type="number" id="equipos" name="equipos" required>
-        <br>
-        <label for="Salas">Salas:</label>
-        <input type="number" id="salas" name="salas" required>
         <br>
         <label for="Rondas">Rondas:</label>
         <input type="number" id="rondas" name="rondas" required>
@@ -125,134 +121,181 @@
         function calcular() {
 
 
-            var equipos = parseInt(document.getElementById('equipos').value);
-            var salas = parseInt(document.getElementById('salas').value);
-            var rondas = parseInt(document.getElementById('rondas').value);
-            if (!isNaN(equipos) && !isNaN(salas) && !isNaN(rondas)) {
-                var combinations = (equipos * (equipos - 1)) / 2;
-                var salasok = Math.floor(equipos / 2);
-                var rondasok = Math.floor(combinations / salasok);
-                var partidas = salas * rondas;
-                document.getElementById('resultado').textContent = 'Número de combinaciones: ' + combinations + '. Número máximo y recomendado de salas: ' + salasok + '. Número máximo y recomendado de rondas: ' + rondasok;
+            var teams = parseInt(document.getElementById('equipos').value);
+            // var rooms = parseInt(document.getElementById('salas').value);
+            var rounds = parseInt(document.getElementById('rondas').value);
+            if (!isNaN(teams) && !isNaN(rounds) && teams % 2 == 0) {
+                var rooms = Math.floor(teams / 2);
+                var combinations = (teams * (teams - 1)) / 2;
+                var roomsOk = Math.floor(teams / 2);
+                var roundsOk = Math.floor(combinations / roomsOk);
+                var matchs = rooms * rounds;
+                document.getElementById('resultado').textContent = 'Número de combinaciones: ' + combinations + '. Número máximo de rondas: ' + roundsOk;
 
-                if (partidas > combinations || salas > salasok) {
+                if (matchs > combinations || rounds > roundsOk) {
                     document.getElementById('resultado').textContent += ' No se puede calcular porque supera el número de combinaciones en cada ronda o en total';
                 } else {
-                    var matrix = new Array();
+                    var combinationsMatrix = new Array();
                     var resultMatrix = new Array();
-                    var enronda = new Array();
+                    var numbersInRound = new Array();
                     var matrixCopyToSplice = new Array();
-                    var randomMarix = new Array();
-                    var tmp = new Array();
-                    var ronda = 0;
-                    var repetido = false;
-                    var intento;
+                    var tmpTeamsArray = new Array();
+                    var round = 0;
+                    var NoSolution = false;
+                    var atempt;
 
+                    do {
+                        resultMatrix = new Array();
+                        fillRound(resultMatrix, teams, rooms);
+                        fillSecondRound(resultMatrix, rooms);
+                        for (let i = 2; i < rounds; i++) {
+                            fillRound(resultMatrix, teams, rooms);
+                        }
+                    } while (resultMatrix.length < rooms * rounds);
 
-                    fillAllCombinationsMatrix(equipos, matrix, combinations);
-					
-					}
-					
-					fillRandomMatrix(randomMarix,matrix, combinations);
+                    printResultTable(rounds, rooms, resultMatrix);
+                }
 
-                    for (let i = 0; i < salas * rondas;) {
-                        intento=1;
-                        do {
-                            repetido = false;
-                            tmp = randomMarix.shift();
-                            
-                            if (i % salas == 0) {
-                                ronda++;
-                                enronda = [];
-                                enronda.push(tmp[0]);
-                                enronda.push(tmp[1]);
-                                resultMatrix[i] = tmp;
-                                i++;
-
-                            } else {
-                                if (enronda.includes(tmp[0]) || enronda.includes(tmp[1])) {
-                                    randomMarix.push(tmp);
-                                    intento++;
-                                    if (intento > randomMarix.length) {
-                                        intento = 1;
-                                        i = 0;
-                                        resultMatrix = new Array();
-                                        randomMarix=new Array();
-                                        ronda = 0;
-										fillRandomMatrix(randomMarix, matrix, combinations);
-                                        //console.log(JSON.stringify(randomMarix));
-                                        break;
-                                    }
-                                    repetido = true;
-                                    continue;
-                                } else {
-                                    enronda.push(tmp[0]);
-                                    enronda.push(tmp[1]);
-                                    resultMatrix[i] = tmp;
-                                    i++;
-                                }
-                            }
-                        } while (repetido);
-                    }
-					printResultTable(rondas, salas, resultMatrix);
-                
             } else {
                 document.getElementById('resultado').textContent = "Ingrese números válidos.";
             }
         }
-		function printResultTable(rondas, salas, resultMatrix){
-		var tabla = "<table><tr><td></td>";
-                    for (let i = 1; i <= rondas; i++) {
-                        tabla += "<td> Ronda " + i + "</td>";
+
+        function fillSideTeams(rightSideTeams, leftSideTeams, resultMatrix, rooms) {
+            for (let j = 0; j < rooms; j++) {
+                leftSideTeams.push(resultMatrix[j][0]);
+                rightSideTeams.push(resultMatrix[j][1]);
+            }
+            let j = tmp = 0;
+            let n = Math.floor(Math.random() * rightSideTeams.length);
+            do {
+                tmp = rightSideTeams.shift();
+                rightSideTeams.push(tmp);
+                j++;
+            } while (j < n);
+
+        }
+
+        function fillSecondRound(resultMatrix, rooms) {
+            let leftSideTeams = new Array();
+            let rightSideTeams = new Array();
+
+            fillSideTeams(rightSideTeams, leftSideTeams, resultMatrix, rooms);
+
+            for (let i = 0; i < rooms; i++) {
+                let tmpMatrix = [[0, 0]];
+                tmpMatrix[0][1] = leftSideTeams.shift();
+                tmpMatrix[0][0] = rightSideTeams.shift();
+                resultMatrix.push(tmpMatrix[0]);
+            }
+        }
+
+        function fillRound(resultMatrix, teams, rooms) {
+            let intento = 1;
+            let insert = 0;
+            let combinations = (teams * (teams - 1)) / 2;
+            let repetir = false;
+            let tmpMatrix = [[0, 0]];
+
+            do {
+                insert = 0;
+                let randomTeamsArray = new Array();
+                fillRandomizedTeams(randomTeamsArray, teams);
+                let tmpTeamsArray = JSON.parse(JSON.stringify(randomTeamsArray));
+
+                for (let i = 0; i < rooms; i++) {
+                    tmpMatrix = [[0, 0]];
+                    tmpMatrix[0][0] = randomTeamsArray.shift();
+                    tmpMatrix[0][1] = randomTeamsArray.shift();
+
+                    if (!matrixIncludes(resultMatrix, tmpMatrix)) {
+                        resultMatrix.push(tmpMatrix[0]);
+                        insert++;
                     }
-                    tabla += "</tr>";
-
-                    for (let i = 0; i < salas; i++) {
-                        tabla += "<tr><td> Sala " + (i + 1) + "</td>";
-
-                        for (let j = 0; j < rondas; j++) {
-                            tabla += "<td>" + resultMatrix[i + (salas * j)][0] + "-" + resultMatrix[i + (salas * j)][1] + "</td>";
-                        }
-                        tabla += "</tr>";
+                    else {
+                        intento++;
+                        randomTeamsArray.push(tmpMatrix[0][1]);
+                        randomTeamsArray.push(tmpMatrix[0][0]);
                     }
-
-                    tabla += "</table>";
-
-
-                    document.getElementById('resultado').innerHTML += tabla;
-					}
-
-		function fillAllCombinationsMatrix(equipos,matrix){
-					for (let i = 1; i <= equipos; i++) {
-                        for (let j = i + 1; j <= equipos; j++) {
-                            let combo = [i, j];
-                            if (!matrix.includes(combo)) {
-                                matrix.push(combo);
-                            }
-                        }
+                }
+                if (intento < combinations && insert < rooms) {
+                    for (let j = 0; j < insert; j++) {
+                        tmpMatrix[0] = resultMatrix.pop();
+                        randomTeamsArray.push(tmpMatrix[0][0]);
+                        randomTeamsArray.push(tmpMatrix[0][1]);
                     }
-					}
-		function fillRandomMatrix(randomMarix, matrix, combinations){
-					let matrixCopyToSplice = new Array();
-                    matrixCopyToSplice = JSON.parse(JSON.stringify(matrix));
+                    repetir = true;
+                }
+                else {
+                    repetir = false;
+                }
+            } while (repetir);
 
-                    for (let i = 0; i < combinations; i++) {
-						
-                        randomMarix.push(matrixCopyToSplice.splice(Math.floor(Math.random() * matrixCopyToSplice.length), 1)[0]);
-                    }
-				}
+        }
+
+        function matrixIncludes(resultMatrix, tmpMatrix) {
+            for (let i = 0; i < resultMatrix.length; i++) {
+                if ((resultMatrix[i][0] == tmpMatrix[0][0] && resultMatrix[i][1] == tmpMatrix[0][1]) || (resultMatrix[i][0] == tmpMatrix[0][1] && resultMatrix[i][1] == tmpMatrix[0][0])) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        function fillRandomizedTeams(randomTeamsArray, teams) {
+            for (let i = 1; i <= teams; i++) {
+
+                randomTeamsArray.push(i);
+            }
+
+            let arrayCopyToSplice = new Array();
+            arrayCopyToSplice = JSON.parse(JSON.stringify(randomTeamsArray));
+
+            for (let i = 0; i < teams; i++) {
+
+                randomTeamsArray[i] = arrayCopyToSplice.splice(Math.floor(Math.random() * arrayCopyToSplice.length), 1)[0];
+            }
+        }
+
+        function printResultTable(rounds, rooms, resultMatrix) {
+            var tabla = "<p>&nbsp;</p><table><tr><td></td>";
+            for (let i = 1; i <= rounds; i++) {
+                tabla += "<th colspan=2> Ronda " + i + "</th>";
+            }
+            tabla += "</tr><tr><th><span class=\"favor\">Favor</span>/<span class=\"contra\">Contra</span></th>";
+            for (let i = 1; i <= rounds; i++) {
+                tabla += "<th class=\"favor\"> F </th><th class=\"contra\"> C </th>";
+            }
+            tabla += "</tr>";
+
+            for (let i = 0; i < rooms; i++) {
+                tabla += "<tr><th> Sala " + (i + 1) + "</th>";
+
+                for (let j = 0; j < rounds; j++) {
+                    tabla += "<td class=\"favor\">" + resultMatrix[i + (rooms * j)][0] + "</td><td class=\"contra\">" + resultMatrix[i + (rooms * j)][1] + "</td>";
+                }
+                tabla += "</tr>";
+            }
+
+            tabla += "</table>";
+
+
+            document.getElementById('resultado').innerHTML += tabla;
+        }
+
+
 
     </script>
 </body>
 <p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><span property="dct:title">Calculo de
-        resultMatrixs de debate</span> by <span property="cc:attributionName">Antonio Sillero</span> is licensed under <a
-        href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank"
+        torneo de debate</span> by <span property="cc:attributionName">Antonio Sillero</span> is licensed under
+    <a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank"
         rel="license noopener noreferrer" style="display:inline-block;">CC BY-SA 4.0<img
             style="height:22px!important;margin-left:3px;vertical-align:text-bottom;"
             src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img
             style="height:22px!important;margin-left:3px;vertical-align:text-bottom;"
             src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img
             style="height:22px!important;margin-left:3px;vertical-align:text-bottom;"
-            src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a></p>
+            src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a>
+</p>
 
 </html>
