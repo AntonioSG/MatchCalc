@@ -76,11 +76,11 @@
             margin: 5px 0;
         }
 
-        .favor{
+        .favor {
             color: #45a049;
         }
 
-        .contra{
+        .contra {
             color: #a8383e;
         }
 
@@ -262,8 +262,13 @@
                 tabla += "<th colspan=2> Ronda " + i + "</th>";
             }
             tabla += "</tr><tr><th><span class=\"favor\">Favor</span>/<span class=\"contra\">Contra</span></th>";
-            for (let i = 1; i <= rounds; i++) {
-                tabla += "<th class=\"favor\"> F </th><th class=\"contra\"> C </th>";
+            for (let i = 0; i < rounds; i++) {
+                if (i < 2) {
+                    tabla += "<th class=\"favor\"> F </th><th class=\"contra\"> C </th>";
+                }
+                else {
+                    tabla += "<th></th><th></th>";
+                }
             }
             tabla += "</tr>";
 
@@ -271,10 +276,16 @@
                 tabla += "<tr><th> Sala " + (i + 1) + "</th>";
 
                 for (let j = 0; j < rounds; j++) {
-                    tabla += "<td class=\"favor\">" + resultMatrix[i + (rooms * j)][0] + "</td><td class=\"contra\">" + resultMatrix[i + (rooms * j)][1] + "</td>";
+                    if (j < 2) {
+                        tabla += "<td class=\"favor\">" + resultMatrix[i + (rooms * j)][0] + "</td><td class=\"contra\">" + resultMatrix[i + (rooms * j)][1] + "</td>";
+                    }
+                    else {
+                        tabla += "<td>" + resultMatrix[i + (rooms * j)][0] + "</td><td>" + resultMatrix[i + (rooms * j)][1] + "</td>";
+                    }
                 }
-                tabla += "</tr>";
             }
+            tabla += "</tr>";
+
 
             tabla += "</table>";
 
